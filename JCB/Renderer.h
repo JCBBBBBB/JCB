@@ -37,11 +37,11 @@ private:
 	ComPtr<ID3D11DeviceContext> _deviceContext;
 	ComPtr<IDXGISwapChain> _swapChain;
 	ComPtr<ID3D11RenderTargetView> _renderTargetView;
-	float _clearColor[4] = {0.5f, 0.5f, 0.5f, 0.5f};
+	float _clearColor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	D3D11_VIEWPORT _viewPort;
 
 	// IA, VS, RS, PS, OM
-	vector<VertexColor> _vertices;
+	vector<VertexTexture> _vertices;
 	vector<uint32> _indices;
 
 	ComPtr<ID3D11Buffer> _vertexBuffer;
