@@ -1,5 +1,6 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 #define _HAS_STD_BYTE 0  // ← 이게 맨 위에 있어야 함
 //#include "Types.h"
@@ -11,6 +12,7 @@
 #include "Structs.h"
 #include "Types.h"
 #include "Values.h"
+#include "Image.h"
 
 // STL
 #include <vector>
@@ -18,6 +20,8 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <algorithm>
+#include <iostream>
 using namespace std;
 
 //WINAPI

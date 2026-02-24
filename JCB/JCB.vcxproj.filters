@@ -59,6 +59,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Util\UnUsed</Filter>
     </ClInclude>
+    <ClInclude Include="Image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">
@@ -73,6 +74,7 @@
     <ClCompile Include="SimpleMath.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="JCB.rc">

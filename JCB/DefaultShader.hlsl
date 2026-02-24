@@ -1,5 +1,5 @@
 
-Texture2D g_texture : register(t0);
+Texture2D g_texture : register(t0); // cpu¿« ºŒ¿Ã¥ı ∏Æº“Ω∫∫‰
 SamplerState g_sampler : register(s0);
 
 struct VSInput

@@ -34,7 +34,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_JCB));
 
     MSG msg;
-    Renderer renderer;
+    JCB::Renderer renderer;
     renderer.Init(hWnd);
 
     // 기본 메시지 루프입니다:
