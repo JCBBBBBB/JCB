@@ -21,6 +21,7 @@ namespace JCB
             image.GaussianBlur5();
         }*/
 
+        image.Bloom(0.3f, 5, 1.5f);
 
 
         image.WritePNG("result.png");
@@ -45,13 +46,10 @@ namespace JCB
 
     void Renderer::Update()
     {
-        for (int i = 0; i < 5; i++)
-        {
-            image.GaussianBlur5();
-        }
+        
 
-        D3D11_MAPPED_SUBRESOURCE subResource;
-        ZeroMemory(&subResource, sizeof(subResource));
+        //D3D11_MAPPED_SUBRESOURCE subResource;
+        //ZeroMemory(&subResource, sizeof(subResource));
 
         // GPU 상수버퍼를 CPU가 쓸 수 있도록 열어준다
 

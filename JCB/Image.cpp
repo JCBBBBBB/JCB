@@ -185,4 +185,40 @@ namespace JCB
 
 		swap(_pixels, pixelBuffer);
 	}
+	void Image::Bloom(const float& th, const int& numRepeat, const float& weight)
+	{
+		vector<Vec4> pixelBuffer = _pixels;
+
+		// 밝은 픽셀만 남긴다
+		for (int j = 0; j < _height; j++)
+		{
+			for (int i = 0; i < _width; i++)
+			{
+				const float eye = _pixels[_width * j + i].x * 0.2126f + _pixels[_width * j + i].y * 0.7152f + _pixels[_width * j + i].z * 0.0722f;
+
+				if (eye < th)
+				{
+					_pixels[_width * j + i].x = 0.f;
+					_pixels[_width * j + i].y = 0.f;
+					_pixels[_width * j + i].z = 0.f;
+				}
+			}
+		}
+
+
+		// 밝은 부분 블러처리한다
+		for (int i = 0; i < numRepeat; i++)
+		{
+			GaussianBlur5();
+		}
+
+
+		// 원래 이미지랑 블러처리한 이미지 더해
+		for (int i = 0; i < _pixels.size(); i++)
+		{
+			_pixels[i].x = clamp(_pixels[i].x * weight + pixelBuffer[i].x, 0.f, 1.f);
+			_pixels[i].y = clamp(_pixels[i].y * weight + pixelBuffer[i].y, 0.f, 1.f);
+			_pixels[i].z = clamp(_pixels[i].z * weight + pixelBuffer[i].z, 0.f, 1.f);
+		}
+	}
 }

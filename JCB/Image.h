@@ -10,6 +10,7 @@ namespace JCB
 		Vec4& GetPixel(int i, int j);
 		void BoxBlur5();
 		void GaussianBlur5();
+		void Bloom(const float& th, const int& numRepeat, const float& weight);
 
 	public:
 		int _width = 0, _height = 0, _channels = 0;
