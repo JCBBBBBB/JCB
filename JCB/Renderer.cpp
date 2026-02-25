@@ -7,7 +7,8 @@ namespace JCB
     {
         _hwnd = hwnd;
 
-        image.ReadFromFile("11.png");
+        _circle = make_shared<Circle>(screenHeight / 4.0f, Vec2(screenWidth / 2.0f, screenHeight / 2.0f), Vec4(1.f,0.f,0.f,0.f ));
+        //image.ReadFromFile("11.png");
 
         ///*for (int i = 0; i < image._width * image._height; i++)
         //{
@@ -21,10 +22,10 @@ namespace JCB
             image.GaussianBlur5();
         }*/
 
-        image.Bloom(0.3f, 5, 1.5f);
+        //image.Bloom(0.3f, 5, 1.5f);
 
 
-        image.WritePNG("result.png");
+        //image.WritePNG("result.png");
 
         CreateDeviceAndSwapChain(); // _device, _deviceContext, _swapChain 생성
         CreateRenderTargetView(); // 백버퍼를 렌더링 대상으로 설정, gpu -> renderTargetView -> 백버퍼
@@ -40,27 +41,31 @@ namespace JCB
         CreateRasterizerState(); // 도형 그리는 방식 설정
 
         CreatePixelShader(); // 셰이더 파일에서 픽셀 쉐이더 부분 컴파일해서 psBlob에 바이너리 파일로 저장한다
-        CreateShaderResourceView(); // 텍스처 로드
+        //CreateShaderResourceView(); // 텍스처 로드
+        CreateTexture2d();
         CreateSamplerState(); // 텍스처 샘플링 방식 설정
     }
 
     void Renderer::Update()
     {
+        vector<Vec4> pixels(screenWidth * screenHeight, Vec4(0.5f, 0.5f, 0.5f, 0.5f));
+
+        // 모든 픽셀을 비교하며 true이면 색칠한다
+        for (int j = 0; j < screenHeight; j++)
+        {
+            for (int i = 0; i < screenWidth; i++)
+            {
+                if (_circle->isInside(i, j))
+                {
+                    pixels[screenWidth * j + i] = _circle->_color;
+                }
+            }
+        }
         
-
-        //D3D11_MAPPED_SUBRESOURCE subResource;
-        //ZeroMemory(&subResource, sizeof(subResource));
-
-        // GPU 상수버퍼를 CPU가 쓸 수 있도록 열어준다
-
-        //_deviceContext->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
-
-        // CPU의 _transformData를 GPU 메모리 subResource로 복사한다
-        // GPU가 새로운 offset 값 알게 된다
-        //::memcpy(subResource.pData, &data, sizeof(data));
-
-        // 데이터를 GPU로 옮긴다
-        //_deviceContext->Unmap(_constantBuffer.Get(), 0);
+        D3D11_MAPPED_SUBRESOURCE ms;
+        _deviceContext->Map(_canvasTexture.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+        memcpy(ms.pData, pixels.data(), pixels.size() * sizeof(Vec4));
+        _deviceContext->Unmap(_canvasTexture.Get(), NULL);
     }
 
     void Renderer::Render() // 바이닝 : gpu 파이프라인의 슬롯에 연결
@@ -266,22 +271,22 @@ namespace JCB
         assert(SUCCEEDED(hr));
     }
 
-    void Renderer::CreateShaderResourceView()
-    {
-        ScratchImage image;
-        ZeroMemory(&image, sizeof(image));
+    //void Renderer::CreateShaderResourceView()
+    //{
+    //    ScratchImage image;
+    //    ZeroMemory(&image, sizeof(image));
 
-        TexMetadata data;
-        ZeroMemory(&data, sizeof(data));
+    //    TexMetadata data;
+    //    ZeroMemory(&data, sizeof(data));
 
 
-        //HRESULT hr = LoadFromWICFile(L"image_1.jpg", WIC_FLAGS_NONE, &data, image);
-        HRESULT hr = LoadFromWICFile(L"result.png", WIC_FLAGS_NONE, &data, image);
-        assert(SUCCEEDED(hr));
+    //    //HRESULT hr = LoadFromWICFile(L"image_1.jpg", WIC_FLAGS_NONE, &data, image);
+    //    HRESULT hr = LoadFromWICFile(L"result.png", WIC_FLAGS_NONE, &data, image);
+    //    assert(SUCCEEDED(hr));
 
-        hr = ::CreateShaderResourceView(_device.Get(), image.GetImages(), image.GetImageCount(), data, _shaderResourceView.GetAddressOf());
-        assert(SUCCEEDED(hr));
-    }
+    //    hr = ::CreateShaderResourceView(_device.Get(), image.GetImages(), image.GetImageCount(), data, _shaderResourceView.GetAddressOf());
+    //    assert(SUCCEEDED(hr));
+    //}
 
     void Renderer::CreateSamplerState()
     {
@@ -302,6 +307,39 @@ namespace JCB
 
         HRESULT hr = _device->CreateSamplerState(&desc, _samplerState.GetAddressOf());
         assert(SUCCEEDED(hr));
+    }
+
+    void Renderer::CreateTexture2d()
+    {
+        D3D11_TEXTURE2D_DESC textureDesc;
+        ZeroMemory(&textureDesc, sizeof(textureDesc));
+        textureDesc.MipLevels = textureDesc.ArraySize = 1;
+        textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+        textureDesc.SampleDesc.Count = 1;
+        textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+        textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        textureDesc.MiscFlags = 0;
+        textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        textureDesc.Width = screenWidth;
+        textureDesc.Height = screenHeight;
+
+        _device->CreateTexture2D(&textureDesc, nullptr, &_canvasTexture);
+
+        if (_canvasTexture)
+        {
+            _device->CreateShaderResourceView(_canvasTexture.Get(), nullptr, _shaderResourceView.GetAddressOf());
+
+            D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+            renderTargetViewDesc.Format = textureDesc.Format;
+            renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+            renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+            _device->CreateRenderTargetView(_canvasTexture.Get(), &renderTargetViewDesc, _canvasRenderTargetView.GetAddressOf());
+        }
+        else
+        {
+            std::cout << "CreateRenderTargetView() error" << std::endl;
+        }
     }
 
     void Renderer::PreRender()

@@ -26,8 +26,10 @@ namespace JCB
 		void CreateRasterizerState();
 
 		void CreatePixelShader();
-		void CreateShaderResourceView();
+		//void CreateShaderResourceView();
 		void CreateSamplerState();
+
+		void CreateTexture2d();
 
 		void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
 
@@ -60,7 +62,11 @@ namespace JCB
 		ComPtr<ID3D11ShaderResourceView> _shaderResourceView;
 		ComPtr<ID3D11SamplerState> _samplerState;
 
+		ComPtr<ID3D11Texture2D> _canvasTexture;
+		ComPtr<ID3D11RenderTargetView> _canvasRenderTargetView;
+
 		Image image;
+		shared_ptr<Circle> _circle;
 	};
 
 }

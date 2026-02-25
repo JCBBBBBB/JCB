@@ -13,6 +13,7 @@
 #include "Types.h"
 #include "Values.h"
 #include "Image.h"
+#include "Circle.h"
 
 // STL
 #include <vector>
